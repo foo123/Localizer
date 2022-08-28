@@ -25,17 +25,23 @@ else:
 
 l10n = Localizer()
 
+# setup supported locales
+l10n.locale('en', {})
 l10n.locale('el', {
     'I want to say {0}' : 'Θέλω να πώ {0}',
     'hello to you' : 'γειά σε σένα',
     'hello to all' : 'γειά σε όλους'
 })
+# set current locale
+l10n.locale('el', True)
 
 print('Localizer.VERSION = ' + Localizer.VERSION)
 print(l10n.locale())
+print(l10n.cl('hello to you', 'γειά σε σένα'))
+print(l10n.cl('hello to all', 'γειά σε όλους'))
 print(l10n.l('hello to you'))
 print(l10n.l('hello to all'))
 print(l10n.l('I want to say {0}', [l10n.l('hello to you')]))
 print(l10n.l('I want to say {0}', [l10n.l('hello to all')]))
-print(l10n.nl(1, 'hello to you', 'hello to all'))
-print(l10n.nl(2, 'hello to you', 'hello to all'))
+print(l10n.ln(1, 'hello to you', 'hello to all'))
+print(l10n.ln(2, 'hello to you', 'hello to all'))

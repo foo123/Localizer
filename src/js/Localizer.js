@@ -1,7 +1,7 @@
 /**
 *
 * Simple class to localize texts for PHP, JavaScript, Python
-* @version 0.1.0
+* @version 1.0.0
 * https://github.com/foo123/Localizer
 *
 */
@@ -43,47 +43,43 @@ function merge(a, b)
     }
     return a;
 }
-function vsprintf(s, args)
-{
-    return s.replace(arg, function(match, index) {
-        return String(args[+index]);
-    });
-}
 
 function Localizer()
 {
+    if (!(this instanceof Localizer)) return new Localizer();
     var self = this,
         _currentLocale = null,
+        _locales = [],
         _translations = {},
         _plurals = {};
 
-    self.locale = function(locale, translations) {
+    self.locale = function(locale, value) {
         if (arguments.length)
         {
             locale = String(locale);
-            if (is_callable(translations))
+            if (-1 === _locales.indexOf(locale))
+            {
+                _locales.push(locale);
+            }
+            if (is_callable(value))
             {
                 // plural form for locale as callable
-                _plurals[locale] = translations;
+                _plurals[locale] = value;
             }
-            else if (is_object(translations))
+            else if (is_object(value))
             {
+                // object of translated strings
                 if (!HAS.call(_translations, locale)) _translations[locale] = {};
-                merge(_translations[locale], translations);
+                merge(_translations[locale], value);
             }
-            _currentLocale = locale;
+            else if (value === true)
+            {
+                // set current locale
+                _currentLocale = locale;
+            }
             return self;
         }
         return _currentLocale;
-    };
-
-    self.l = function(s, args) {
-        // localization
-        var locale = _currentLocale;
-        s = String(s);
-        var ls = locale && HAS.call(_translations, locale) && HAS.call(_translations[locale], s) ? String(_translations[locale][s]) : s;
-        if (is_array(args)) ls = vsprintf(ls, args);
-        return ls;
     };
 
     self.isPlural = function(n) {
@@ -93,18 +89,47 @@ function Localizer()
         return isPlural;
     };
 
-    self.nl = function(n, singular, plural, args) {
+    self.cl = function(/*..args*/) {
+        // choose among given localised strings
+        // based on index of current locale among supported locales
+        var index = _locales.indexOf(_currentLocale);
+        return -1 === index ? arguments[0] : arguments[index];
+    };
+
+    self.l = function(s, args) {
+        // localization
+        var locale = _currentLocale;
+        s = String(s);
+        var ls = locale && HAS.call(_translations, locale) && HAS.call(_translations[locale], s) ? String(_translations[locale][s]) : s;
+        if (is_array(args))
+        {
+            ls = ls.replace(arg, function(match, index) {
+                index = parseInt(index);
+                return HAS.call(args, index) ? String(args[index]) : match;
+            });
+        }
+        return ls;
+    };
+
+    self.cn = function(n, singular, plural) {
+        // choose among singular/plural  based on n
+        return self.isPlural(n) ? plural : singular;
+    };
+
+    self.ln = function(n, singular, plural, args) {
         // singular/plural localization based on $n
-        return self.l(self.isPlural(n) ? plural : singular, args);
+        return self.l(self.cn(n, singular, plural), args);
     };
 }
-Localizer.VERSION = '0.1.0';
+Localizer.VERSION = '1.0.0';
 Localizer.prototype = {
     constructor: Localizer,
     locale: null,
-    l: null,
     isPlural: null,
-    nl: null
+    cl: null,
+    l: null,
+    cn: null,
+    ln: null
 };
 
 // export it
