@@ -1,13 +1,13 @@
 ##
 #
 # Simple class to localize texts for PHP, JavaScript, Python
-# @version 1.0.0
+# @version 2.0.0
 # https://github.com/foo123/Localizer
 #
 ##
 
 class Localizer:
-    VERSION = '1.0.0'
+    VERSION = '2.0.0'
 
     def __init__(self):
         self._currentLocale = None
@@ -18,7 +18,7 @@ class Localizer:
     def locale(self, *args):
         l = len(args)
         if l:
-            locale = str(args[0])
+            locale = str(args[0]).lower()
             value = args[1] if l > 1 else None
 
             if not (locale in self._locales):
@@ -47,22 +47,34 @@ class Localizer:
         isPlural = bool(self._plurals[locale](n)) if locale and (locale in self._plurals) and callable(self._plurals[locale]) else (1 != n)
         return isPlural
 
-    def cl(self, *args):
-        # choose among given localised strings
-        # based on index of current locale among supported locales
-        try:
-            index = self._locales.index(self._currentLocale)
-        except ValueError:
-            index = -1
-        return args[0] if -1 == index else args[index]
+    def r(self, s, args = None):
+        # replace str {arg} placeholders with args
+        s = str(s)
+        if isinstance(args, (list, tuple)): s = s.format(*args)
+        return s
 
-    def l(self, s, args = None):
-        # localization
+    def ll(self, s, args = None):
+        # localization by translation lookup
         locale = self._currentLocale
         s = str(s)
-        ls = str(self._translations[locale][s]) if locale and (locale in self._translations) and (s in self._translations[locale]) else s
-        if isinstance(args, (list, tuple)): ls = ls.format(*args)
-        return ls
+        return self.r(self._translations[locale][s] if locale and (locale in self._translations) and (s in self._translations[locale]) else s, args)
+
+    def cl(self, *s):
+        # localization by choosing among localised strings given in same order as supported locales
+        locale = self._currentLocale
+        args = s.pop() if len(s) > len(self._locales) else None
+        try:
+            index = self._locales.index(locale)
+        except ValueError:
+            index = -1
+        return self.r('' if -1 == index or index >= len(s) else s[index], args)
+
+    def l(self, *args):
+        # localization both by choosing and by lookup
+        if 2 > len(args) or args[1] is None or isinstance(args[1], (list,tuple)):
+            return self.ll(args[0], args[1] if 2 <= len(args) else None)
+        else:
+            return self.cl(*args)
 
     def cn(self, n, singular, plural):
         # choose among singular/plural  based on n

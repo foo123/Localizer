@@ -2,7 +2,7 @@
 /**
 *
 * Simple class to localize texts for PHP, JavaScript, Python
-* @version 1.0.0
+* @version 2.0.0
 * https://github.com/foo123/Localizer
 *
 */
@@ -11,7 +11,7 @@ if (!class_exists('Localizer', false))
 {
 class Localizer
 {
-    const VERSION = '1.0.0';
+    const VERSION = '2.0.0';
 
     private $_currentLocale = null;
     private $_locales = null;
@@ -32,7 +32,7 @@ class Localizer
     {
         if (func_num_args())
         {
-            $locale = (string)$locale;
+            $locale = strtolower((string)$locale);
             if (!in_array($locale, $this->_locales))
             {
                 $this->_locales[] = $locale;
@@ -66,29 +66,50 @@ class Localizer
         return $isPlural;
     }
 
-    public function cl(/*..args*/)
+    public function r($s, $args = null)
     {
-        // choose among given localised strings
-        // based on index of current locale among supported locales
-        $args = func_get_args();
-        $index = array_search($this->_currentLocale, $this->_locales);
-        return false === $index ? $args[0] : $args[$index];
-    }
-
-    public function l($s, $args = null)
-    {
-        // localization
-        $locale = $this->_currentLocale;
+        // replace str {arg} placeholders with args
         $s = (string)$s;
-        $ls = $locale && isset($this->_translations[$locale]) && isset($this->_translations[$locale][$s]) ? (string)$this->_translations[$locale][$s] : $s;
         if (is_array($args))
         {
-            $ls = preg_replace_callback(self::$arg, function($match) use ($args) {
+            $s = preg_replace_callback(self::$arg, function($match) use ($args) {
                 $index = intval($match[1]);
-                return isset($args[$index]) ? (string)$args[$index] : $match[0];
-            }, $ls);
+                return (string)(isset($args[$index]) ? $args[$index] : $match[0]);
+            }, $s);
         }
-        return $ls;
+        return $s;
+    }
+
+    public function ll($s, $args = null)
+    {
+        // localization by translation lookup
+        $locale = $this->_currentLocale;
+        $s = (string)$s;
+        return $this->r($locale && isset($this->_translations[$locale]) && isset($this->_translations[$locale][$s]) ? $this->_translations[$locale][$s] : $s, $args);
+    }
+
+    public function cl(/*..args*/)
+    {
+        // localization by choosing among localised strings given in same order as supported locales
+        $locale = $this->_currentLocale;
+        $s = func_get_args();
+        $args = count($s) > count($this->_locales) ? array_pop($s) : null;
+        $index = array_search($locale, $this->_locales);
+        return $this->r(false === $index || !isset($s[$index]) ? '' : $s[$index], $args);
+    }
+
+    public function l(/*..args*/)
+    {
+        // localization both by choosing and by lookup
+        $args = func_get_args();
+        if (2 > count($args) || null === $args[1] || is_array($args[1]))
+        {
+            return $this->ll($args[0], isset($args[1]) ? $args[1] : null);
+        }
+        else
+        {
+            return call_user_func_array(array($this, 'cl'), $args);
+        }
     }
 
     public function cn($n, $singular, $plural)

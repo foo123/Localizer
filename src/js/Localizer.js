@@ -1,7 +1,7 @@
 /**
 *
 * Simple class to localize texts for PHP, JavaScript, Python
-* @version 1.0.0
+* @version 2.0.0
 * https://github.com/foo123/Localizer
 *
 */
@@ -22,28 +22,6 @@ var HAS = Object.prototype.hasOwnProperty,
     toString = Object.prototype.toString,
     arg = /\{(\d+)\}/g;
 
-function is_array(x)
-{
-    return '[object Array]' === toString.call(x);
-}
-function is_object(x)
-{
-    return '[object Object]' === toString.call(x);
-}
-function is_callable(x)
-{
-    return 'function' === typeof x;
-}
-function merge(a, b)
-{
-    for (var k in b)
-    {
-        if (!HAS.call(b, k)) continue;
-        a[k] = b[k];
-    }
-    return a;
-}
-
 function Localizer()
 {
     if (!(this instanceof Localizer)) return new Localizer();
@@ -56,7 +34,7 @@ function Localizer()
     self.locale = function(locale, value) {
         if (arguments.length)
         {
-            locale = String(locale);
+            locale = String(locale).toLowerCase();
             if (-1 === _locales.indexOf(locale))
             {
                 _locales.push(locale);
@@ -89,27 +67,45 @@ function Localizer()
         return isPlural;
     };
 
-    self.cl = function(/*..args*/) {
-        // choose among given localised strings
-        // based on index of current locale among supported locales
-        var index = _locales.indexOf(_currentLocale);
-        return -1 === index ? arguments[0] : arguments[index];
-    };
-
-    self.l = function(s, args) {
-        // localization
-        var locale = _currentLocale;
+    self.r = function(s, args) {
+        // replace str {arg} placeholders with args
         s = String(s);
-        var ls = locale && HAS.call(_translations, locale) && HAS.call(_translations[locale], s) ? String(_translations[locale][s]) : s;
         if (is_array(args))
         {
-            ls = ls.replace(arg, function(match, index) {
+            s = s.replace(arg, function(match, index) {
                 index = parseInt(index);
-                return HAS.call(args, index) ? String(args[index]) : match;
+                return String(HAS.call(args, index) ? args[index] : match);
             });
         }
-        return ls;
+        return s;
     };
+
+    self.ll = function(s, args) {
+        // localization by translation lookup
+        var locale = _currentLocale;
+        s = String(s);
+        return self.r(locale && HAS.call(_translations, locale) && HAS.call(_translations[locale], s) ? _translations[locale][s] : s, args);
+    };
+
+    self.cl = function(/*..args*/) {
+        // localization by choosing among localised strings given in same order as supported locales
+        var locale = _currentLocale, s = arguments,
+            args = s.length > _locales.length ? s[s.length-1] : null,
+            index = _locales.indexOf(_currentLocale);
+        return self.r(-1 === index || null == s[index] ? '' : s[index], args);
+    };
+
+    self.l = function(/*..args*/) {
+        // localization both by choosing and by lookup
+        if (2 > arguments.length || null == arguments[1] || is_array(arguments[1]))
+        {
+            return self.ll(arguments[0], arguments[1]);
+        }
+        else
+        {
+            return self.cl.apply(self, arguments);
+        }
+    }
 
     self.cn = function(n, singular, plural) {
         // choose among singular/plural  based on n
@@ -121,16 +117,41 @@ function Localizer()
         return self.l(self.cn(n, singular, plural), args);
     };
 }
-Localizer.VERSION = '1.0.0';
+Localizer.VERSION = '2.0.0';
 Localizer.prototype = {
     constructor: Localizer,
     locale: null,
     isPlural: null,
+    r: null,
+    ll: null,
     cl: null,
     l: null,
     cn: null,
     ln: null
 };
+
+// utils
+function is_array(x)
+{
+    return '[object Array]' === toString.call(x);
+}
+function is_object(x)
+{
+    return '[object Object]' === toString.call(x);
+}
+function is_callable(x)
+{
+    return 'function' === typeof x;
+}
+function merge(a, b)
+{
+    for (var k in b)
+    {
+        if (!HAS.call(b, k)) continue;
+        a[k] = b[k];
+    }
+    return a;
+}
 
 // export it
 return Localizer;

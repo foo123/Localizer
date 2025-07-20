@@ -15,11 +15,13 @@ $l10n->locale('el', true);
 
 echo 'Localizer::VERSION = ' . Localizer::VERSION . PHP_EOL;
 echo $l10n->locale() . PHP_EOL;
+echo $l10n->ll('hello to you') . PHP_EOL;
+echo $l10n->ll('hello to all') . PHP_EOL;
 echo $l10n->cl('hello to you', 'γειά σε σένα') . PHP_EOL;
 echo $l10n->cl('hello to all', 'γειά σε όλους') . PHP_EOL;
-echo $l10n->l('hello to you') . PHP_EOL;
-echo $l10n->l('hello to all') . PHP_EOL;
-echo $l10n->l('I want to say {0}', [$l10n->l('hello to you')]) . PHP_EOL;
-echo $l10n->l('I want to say {0}', [$l10n->l('hello to all')]) . PHP_EOL;
+echo $l10n->ll('I want to say {0}', [$l10n->l('hello to you')]) . PHP_EOL;
+echo $l10n->ll('I want to say {0}', [$l10n->l('hello to all')]) . PHP_EOL;
 echo $l10n->ln(1, 'hello to you', 'hello to all') . PHP_EOL;
 echo $l10n->ln(2, 'hello to you', 'hello to all') . PHP_EOL;
+echo $l10n->l('hello to you', 'γειά σε σένα') . PHP_EOL;
+echo $l10n->l('hello to you') . PHP_EOL;
