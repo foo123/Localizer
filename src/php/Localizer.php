@@ -106,7 +106,7 @@ class Localizer
     {
         // replace str {arg} placeholders with args
         $s = (string)$s;
-        if (is_array($args))
+        if (is_array($args) && !empty($args))
         {
             $s = preg_replace_callback(self::$arg, function($match) use ($args) {
                 $index = intval($match[1]);
@@ -170,10 +170,10 @@ class Localizer
     public function ln($n, $singular, $plural, $args = null)
     {
         // singular/plural localization based on $n
-        return $this->l($this->cn($n, $singular, $plural), $args);
+        return $this->l($this->cn($n, $singular, $plural), is_array($args) ? $args : array());
     }
 
-    private function merge($a, $b, $deep=false)
+    private function merge($a, $b, $deep = false)
     {
         foreach (array_keys($b) as $k)
         {

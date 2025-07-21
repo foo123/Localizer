@@ -105,7 +105,7 @@ function Localizer()
     self.replace = function(s, args) {
         // replace str {arg} placeholders with args
         s = String(s);
-        if (is_array(args))
+        if (is_array(args) && args.length)
         {
             s = s.replace(arg, function(match, index) {
                 index = parseInt(index);
@@ -162,7 +162,7 @@ function Localizer()
 
     self.ln = function(n, singular, plural, args) {
         // singular/plural localization based on n
-        return self.l(self.cn(n, singular, plural), args);
+        return self.l(self.cn(n, singular, plural), is_array(args) ? args : []);
     };
 }
 Localizer.VERSION = '2.0.0';

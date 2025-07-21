@@ -81,7 +81,7 @@ class Localizer:
     def replace(self, s, args = None):
         # replace str {arg} placeholders with args
         s = str(s)
-        if isinstance(args, (list, tuple)): s = s.format(*args)
+        if isinstance(args, (list,tuple)) and len(args): s = s.format(*args)
         return s
 
     def ll(self, s, args = None):
@@ -122,10 +122,10 @@ class Localizer:
 
     def ln(self, n, singular, plural, args = None):
         # singular/plural localization based on n
-        return self.l(self.cn(n, singular, plural), args)
+        return self.l(self.cn(n, singular, plural), args if isinstance(args, (list,tuple)) else tuple())
 
 
-def merge(a, b, deep=False):
+def merge(a, b, deep = False):
     for k in b.keys():
         if deep:
             if (k in a) and isinstance(a[k], dict) and isinstance(b[k], dict):
