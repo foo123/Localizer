@@ -74,6 +74,10 @@ class Localizer:
         isPlural = bool(self._plurals[locale](n)) if locale and (locale in self._plurals) and callable(self._plurals[locale]) else (1 != n)
         return isPlural
 
+    def cn(self, n, singular, plural):
+        # choose among singular/plural  based on n
+        return plural if self.isPlural(n) else singular
+
     def replace(self, s, args = None):
         # replace str {arg} placeholders with args
         s = str(s)
@@ -102,23 +106,19 @@ class Localizer:
         # localization by choosing among localised strings given in same order as supported locales
         # context is automatically taken care of since translations are given at the specific point
         locale = self._currentLocale
-        args = s.pop() if len(s) and (isinstance(s[-1],(list,tuple)) or (s[-1] is None)) else None
+        args = s.pop() if len(s) > len(self._locales) and isinstance(s[-1], (list,tuple)) else None
         try:
             index = self._locales.index(locale)
         except ValueError:
             index = -1
-        return self.replace('' if -1 == index or index >= len(s) else s[index], args)
+        return (self.ll(s[0], args) if len(s) and (s[0] is not None) else '') if -1 == index or index >= len(s) or (s[index] is None) else self.replace(s[index], args)
 
     def l(self, *args):
         # localization either by choosing or by lookup
-        if 2 > len(args) or args[1] is None or isinstance(args[1], (list,tuple)):
+        if 2 > len(args) or isinstance(args[1], (list,tuple)):
             return self.ll(args[0], args[1] if 2 <= len(args) else None)
         else:
             return self.cl(*args)
-
-    def cn(self, n, singular, plural):
-        # choose among singular/plural  based on n
-        return plural if self.isPlural(n) else singular
 
     def ln(self, n, singular, plural, args = None):
         # singular/plural localization based on n

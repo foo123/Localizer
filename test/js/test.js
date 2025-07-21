@@ -26,10 +26,10 @@ require('fs').writeSync(process.stdout.fd, UTF8_BOM, 0, UTF8_BOM.length);
 
 console.log('Localizer.VERSION = ' + Localizer.VERSION);
 console.log(l10n.locale());
-console.log(l10n.ll('hello to you'));
-console.log(l10n.ll('hello to all'));
-console.log(l10n.cl('hello to you', 'γειά σε σένα'));
-console.log(l10n.cl('hello to all', 'γειά σε όλους'));
+console.log(l10n.l('hello to you'));
+console.log(l10n.l('hello to all'));
+console.log(l10n.l('hello to you', 'γειά σε σένα'));
+console.log(l10n.l('hello to all', 'γειά σε όλους'));
 console.log(l10n.l('I want to say {0}', [l10n.l('hello to you')]));
 console.log(l10n.l('I want to say {0}', [l10n.l('hello to all')]));
 console.log(l10n.ln(1, 'hello to you', 'hello to all'));

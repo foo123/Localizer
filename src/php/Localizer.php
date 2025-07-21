@@ -96,6 +96,12 @@ class Localizer
         return $isPlural;
     }
 
+    public function cn($n, $singular, $plural)
+    {
+        // choose among singular/plural  based on $n
+        return $this->isPlural($n) ? $plural : $singular;
+    }
+
     public function replace($s, $args = null)
     {
         // replace str {arg} placeholders with args
@@ -142,16 +148,16 @@ class Localizer
         // context is automatically taken care of since translations are given at the specific point
         $locale = $this->_currentLocale;
         $s = func_get_args();
-        $args = count($s) && (is_array($s[count($s)-1]) || (null === $s[count($s)-1])) ? array_pop($s) : null;
+        $args = count($s) > count($this->_locales) && is_array($s[count($s)-1]) ? array_pop($s) : null;
         $index = array_search($locale, $this->_locales);
-        return $this->replace(false === $index || !isset($s[$index]) ? '' : $s[$index], $args);
+        return false === $index || !isset($s[$index]) ? (isset($s[0]) ? $this->ll($s[0], $args) : '') : $this->replace($s[$index], $args);
     }
 
     public function l(/*..args*/)
     {
         // localization either by choosing or by lookup
         $args = func_get_args();
-        if (2 > count($args) || null === $args[1] || is_array($args[1]))
+        if (2 > count($args) || is_array($args[1]))
         {
             return $this->ll($args[0], isset($args[1]) ? $args[1] : null);
         }
@@ -159,12 +165,6 @@ class Localizer
         {
             return call_user_func_array(array($this, 'cl'), $args);
         }
-    }
-
-    public function cn($n, $singular, $plural)
-    {
-        // choose among singular/plural  based on $n
-        return $this->isPlural($n) ? $plural : $singular;
     }
 
     public function ln($n, $singular, $plural, $args = null)

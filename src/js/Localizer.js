@@ -97,6 +97,11 @@ function Localizer()
         return isPlural;
     };
 
+    self.cn = function(n, singular, plural) {
+        // choose among singular/plural  based on n
+        return self.isPlural(n) ? plural : singular;
+    };
+
     self.replace = function(s, args) {
         // replace str {arg} placeholders with args
         s = String(s);
@@ -138,14 +143,14 @@ function Localizer()
         // localization by choosing among localised strings given in same order as supported locales
         // context is automatically taken care of since translations are given at the specific point
         var locale = _currentLocale, s = [].slice.call(arguments),
-            args = s.length && (is_array(s[s.length-1]) || (null == s[s.length-1])) ? s.pop() : null,
+            args = s.length > _locales.length && is_array(s[s.length-1]) ? s.pop() : null,
             index = _locales.indexOf(_currentLocale);
-        return self.replace(-1 === index || null == s[index] ? '' : s[index], args);
+        return -1 === index || null == s[index] ? (null != s[0] ? self.ll(s[0], args) : '') : self.replace(s[index], args);
     };
 
     self.l = function(/*..args*/) {
         // localization either by choosing or by lookup
-        if (2 > arguments.length || null == arguments[1] || is_array(arguments[1]))
+        if (2 > arguments.length || is_array(arguments[1]))
         {
             return self.ll(arguments[0], arguments[1]);
         }
@@ -154,11 +159,6 @@ function Localizer()
             return self.cl.apply(self, arguments);
         }
     }
-
-    self.cn = function(n, singular, plural) {
-        // choose among singular/plural  based on n
-        return self.isPlural(n) ? plural : singular;
-    };
 
     self.ln = function(n, singular, plural, args) {
         // singular/plural localization based on n
@@ -170,11 +170,11 @@ Localizer.prototype = {
     constructor: Localizer,
     locale: null,
     isPlural: null,
+    cn: null,
     replace: null,
     ll: null,
     cl: null,
     l: null,
-    cn: null,
     ln: null
 };
 
