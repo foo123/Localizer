@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os, sys
 
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -26,7 +27,6 @@ if not Localizer:
     print ('Could not load the Localizer Module')
     sys.exit(1)
 
-
 l10n = Localizer()
 
 # setup supported locales
@@ -44,6 +44,12 @@ l10n.locale('el', {
 })
 # set current locale
 l10n.locale('el', True)
+
+# UTF8 BOM
+UTF8_BOM = b"\xEF\xBB\xBF"
+sys.stdout.reconfigure(encoding='utf-8')
+sys.stdout.buffer.write(UTF8_BOM)
+sys.stdout.flush()
 
 print('Localizer.VERSION = ' + Localizer.VERSION)
 print(l10n.locale())

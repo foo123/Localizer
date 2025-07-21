@@ -77,7 +77,7 @@ function Localizer()
                 else
                 {
                     if (!HAS.call(_translations, locale)) _translations[locale] = {};
-                    merge(_translations[locale], value, true);
+                    _translations[locale] = merge(_translations[locale], value, true);
                 }
             }
             else if (value === true)

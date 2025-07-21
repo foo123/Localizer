@@ -20,6 +20,10 @@ l10n.locale('el', {
 // set current locale
 l10n.locale('el', true);
 
+// UTF8 BOM
+const UTF8_BOM = Buffer.from([0xEF,0xBB,0xBF]);
+require('fs').writeSync(process.stdout.fd, UTF8_BOM, 0, UTF8_BOM.length);
+
 console.log('Localizer.VERSION = ' + Localizer.VERSION);
 console.log(l10n.locale());
 console.log(l10n.ll('hello to you'));
