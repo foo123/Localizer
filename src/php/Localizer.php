@@ -148,7 +148,7 @@ class Localizer
         // context is automatically taken care of since translations are given at the specific point
         $locale = $this->_currentLocale;
         $s = func_get_args();
-        $args = count($s) > count($this->_locales) && is_array($s[count($s)-1]) ? array_pop($s) : null;
+        $args = count($s) && is_array($s[count($s)-1]) ? array_pop($s) : null;
         $index = array_search($locale, $this->_locales);
         return false === $index || !isset($s[$index]) ? (isset($s[0]) ? $this->ll($s[0], $args) : '') : $this->replace($s[$index], $args);
     }

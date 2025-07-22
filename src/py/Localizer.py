@@ -106,7 +106,7 @@ class Localizer:
         # localization by choosing among localised strings given in same order as supported locales
         # context is automatically taken care of since translations are given at the specific point
         locale = self._currentLocale
-        args = s.pop() if len(s) > len(self._locales) and isinstance(s[-1], (list,tuple)) else None
+        args = s.pop() if len(s) and isinstance(s[-1], (list,tuple)) else None
         try:
             index = self._locales.index(locale)
         except ValueError:

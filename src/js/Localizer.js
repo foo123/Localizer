@@ -143,7 +143,7 @@ function Localizer()
         // localization by choosing among localised strings given in same order as supported locales
         // context is automatically taken care of since translations are given at the specific point
         var locale = _currentLocale, s = [].slice.call(arguments),
-            args = s.length > _locales.length && is_array(s[s.length-1]) ? s.pop() : null,
+            args = s.length && is_array(s[s.length-1]) ? s.pop() : null,
             index = _locales.indexOf(_currentLocale);
         return -1 === index || null == s[index] ? (null != s[0] ? self.ll(s[0], args) : '') : self.replace(s[index], args);
     };
